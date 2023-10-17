@@ -14,8 +14,8 @@ class UserData(BaseModel):
     vehicle: Optional[dict] = None
 
 @app.post("/calculate-risk-profile")
-async def calculate_user_risk_profile(user_data: UserData):
-    def map_to_profile(score):
+async def calculate_risk(user_data: UserData):
+    def Get_risk_type(score):
         if score <= 0:
             return "economic"
         elif score <= 2:
@@ -23,7 +23,6 @@ async def calculate_user_risk_profile(user_data: UserData):
         else:
             return "responsible"
 
-    # Extract user attributes
     age = user_data.age
     dependents = user_data.dependents
     income = user_data.income
@@ -36,20 +35,17 @@ async def calculate_user_risk_profile(user_data: UserData):
     vehicle = user_data.vehicle or {}
     vehicle_year = vehicle.get('year', None)
 
-    # Calculate base risk score
     base_score = sum(risk_questions)
 
-    # Initialize risk scores for each line of insurance
-    life_score = base_score
-    disability_score = base_score
-    home_score = base_score
-    auto_score = base_score
+    life_score = int(base_score)
+    disability_score = int(base_score)
+    home_score = int(base_score)
+    auto_score = int(base_score)
 
-    # Apply rules to calculate risk scores
     if not income:
-        disability_score = auto_score = home_score = "ineligible"
+        disability_score = auto_score = home_score = 0
     if age > 60:
-        disability_score = life_score = "ineligible"
+        disability_score = life_score = 0
     if age < 30:
         life_score -= 2
         disability_score -= 2
@@ -78,8 +74,8 @@ async def calculate_user_risk_profile(user_data: UserData):
         auto_score += 1
 
     return {
-        "auto": map_to_profile(auto_score),
-        "disability": map_to_profile(disability_score),
-        "home": map_to_profile(home_score),
-        "life": map_to_profile(life_score)
+        "auto": Get_risk_type(auto_score),
+        "disability": Get_risk_type(disability_score),
+        "home": Get_risk_type(home_score),
+        "life": Get_risk_type(life_score)
     }
