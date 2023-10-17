@@ -15,14 +15,8 @@ class UserData(BaseModel):
 
 @app.post("/calculate-risk-profile")
 async def calculate_risk(user_data: UserData):
-    def Get_risk_type(score):
-        if score <= 0:
-            return "economic"
-        elif score <= 2:
-            return "regular"
-        else:
-            return "responsible"
 
+    #getting value
     age = user_data.age
     dependents = user_data.dependents
     income = user_data.income
@@ -34,7 +28,8 @@ async def calculate_risk(user_data: UserData):
 
     vehicle = user_data.vehicle or {}
     vehicle_year = vehicle.get('year', None)
-
+    
+    #checking base score
     base_score = sum(risk_questions)
 
     life_score = int(base_score)
@@ -42,6 +37,7 @@ async def calculate_risk(user_data: UserData):
     home_score = int(base_score)
     auto_score = int(base_score)
 
+    #calculate the risk
     if not income:
         disability_score = auto_score = home_score = 0
     if age > 60:
@@ -72,6 +68,14 @@ async def calculate_risk(user_data: UserData):
         disability_score -= 1
     if vehicle_year and vehicle_year >= (2023 - 5):
         auto_score += 1
+
+    def Get_risk_type(score):
+        if score <= 0:
+            return "economic"
+        elif score <= 2:
+            return "regular"
+        else:
+            return "responsible"
 
     return {
         "auto": Get_risk_type(auto_score),
