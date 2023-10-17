@@ -69,7 +69,7 @@ async def calculate_risk(user_data: UserData):
     if vehicle_year and vehicle_year >= (2023 - 5):
         auto_score += 1
 
-    def Get_risk_type(score):
+    def get_risk_type(score):
         if score <= 0:
             return "economic"
         elif score <= 2:
